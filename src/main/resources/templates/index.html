@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            div{
+                text-align:center;
+                position: centered;
+            }
+            input:focus {
+                background-color: lightblue;
+            }
+        </style>
+    </head>
+    <body>
+        <script>
+            function metodo_post(){  
+                fetch('http://localhost:8080/alumnos/create',{
+                method: 'POST',
+                body: JSON.stringify(
+                    {"matricula": document.getElementById("mat").value,
+                     "nombre": ""+document.getElementById("nom").value,
+                      "carrera":""+document.getElementById("car").value}),
+                cache: 'no-cache'
+                })
+                .then(function(response) {
+                    if(response.ok) {
+                        document.getElementById("resultado").innerHTML="Llamado al método post() "+response.type;
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    console.log('data = ', data);
+                })
+                .catch(function(err) {
+                    console.error(err);
+                });
+            }
+            function metodo_get_all(){
+                fetch('http://localhost:8080/alumnos', {
+                    method: 'GET'
+                    })
+                .then(function(response) {
+                    if(response.ok) {
+                        document.getElementById("resultado").innerHTML="Llamado al método get_all() "+response.type;
+                    } else {
+                        
+                    }
+                })
+
+            }
+            function metodo_get_id(){
+                var matricula= document.getElementById("mat").value;
+                fetch('http://localhost:8080/alumnos/'+matricula+' ', {
+                    method: 'GET'
+                    })
+                .then(function(response) {
+                    if(response.ok) {
+                        document.getElementById("resultado").innerHTML="Llamado al método get_id() "+response.type;
+                    } else {
+                        
+                    }
+                })
+            }
+            function metodo_put(){
+                fetch('http://localhost:8080/alumnos/create',{
+                method: 'PUT',
+                body: JSON.stringify(
+                    {"matricula": document.getElementById("mat").value,
+                     "nombre": ""+document.getElementById("nom").value,
+                      "carrera":""+document.getElementById("car").value}),
+                cache: 'no-cache'
+                })
+                .then(function(response) {
+                    if(response.ok) {
+                        document.getElementById("resultado").innerHTML="Llamado al método put() "+response.type;
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    console.log('data = ', data);
+                })
+                .catch(function(err) {
+                    console.error(err);
+                });               
+                
+            }
+            function metodo_delete(){
+                var matricula= document.getElementById("mat").value;
+                fetch('http://localhost:8080/alumnos/'+matricula+' ', {
+                    method: 'DELETE'
+                    })
+                .then(function(response) {
+                    if(response.ok) {
+                        document.getElementById("resultado").innerHTML="Llamado al método get_delete() "+response.type;
+                    } else {
+                        
+                    }
+                })
+            }
+            
+        </script>
+        <div >
+            <h1>Práctica de Endpoint Rest </h1>
+            <h2>Métodos CRUD</h2>
+            <form >
+                Matricula: <input type="text" name="matricula" id="mat"><br>
+                Nombre: <input type="text" name="nombre" id="nom"><br>
+                Carrera: <input type="text" name="carrera" id="car"><br>
+            </form><br>
+            <input type="submit" value="Post" onclick="metodo_post()">
+            <input type="submit" value="Get_All" onclick="metodo_get_all()">
+            <input type="submit" value="Get_ID" onclick="metodo_get_id()">
+            <input type="submit" value="PUT" onclick="metodo_put()">
+            <input type="submit" value="DELETE" onclick="metodo_delete()">
+            <br><br><p id="resultado"></p>
+        </div>
+    </body>
+</html>
