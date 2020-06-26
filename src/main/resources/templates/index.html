@@ -9,110 +9,163 @@
             input:focus {
                 background-color: lightblue;
             }
+            input:invalid:required {
+                background-image: linear-gradient(to right, pink, lightgreen);
+            }
+
+            input:valid {
+                border: 2px solid black;
+            }
         </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js">  </script>
+        <script>
+            $(document).ready(function(){
+                $.ajaxSetup({contentType: "application/json; charset=utf-8"});
+                //Método para registrar un alumno
+                $("#post").click(function(){
+                    
+                    var opt= valida_campos();
+                    if(opt == true){
+                        
+                        var alumno = {
+                            matricula:$("#matricula").val(),
+                            nombre:$("#nombre").val(),
+                            carrera:$("#carrrera").val()
+                            };
+                        var alumnoJSON=JSON.stringify(alumno);   
+                        console.log("Alumno= "+alumnoJSON);
+                        var url="http://localhost:8080/alumnos"
+                        $.post(url,alumnoJSON,function(data,status){
+                            $("#resultado").html(""+status);
+                        })
+                        .fail(function (){
+                            $("#resultado").html("No puedes registrar a 2 alumnos con la misma matricula");
+                        })
+
+                    }else{
+                        
+                    }
+                });
+
+                //Método que recupera a un alumno mediante su matricula
+                $("#get_id").click(function(){
+                    var url="http://localhost:8080/alumnos/"+$("#matricula").val();
+                    var opt=$("#matricula").val();
+                    if(opt != ''){
+                        console.log(url);
+                        $.get(url,function(data,status){
+                            console.log("Status ="+status);
+                            $("#resultado").html("Alumno "+data.nombre+" con matricula "+data.matricula+" estudia "+data.carrera);
+                        })
+                        .fail(function (){
+                            $("#resultado").html("El alumno con matricula "+$("#matricula").val()+" no esta registrado");
+                        })
+                    }else{
+                        alert("Es necesario llenar el campo de la matricula");
+                    }
+
+                    
+                });
+
+                //Método que recupera a todos los alumnos
+                $("#get_all").click(function(){
+                    var url="http://localhost:8080/alumnos";
+                    console.log(url);
+                    $.getJSON(url,function(data,status){
+                        console.log("Status ="+status);
+                        $("#resultado").html("Alumno "+data);                        
+                    });
+                });
+
+                //Método que actualiza a un alumno mediante su matricula
+                $("#put").click(function(){
+
+                    var opt= valida_campos();
+                    if(opt == true){
+                        var url="http://localhost:8080/alumnos/"+$("#matricula").val();
+                        let data = {
+                            matricula:$("#matricula").val(),
+                            nombre:$("#nombre").val(),
+                            carrera:$("#carrrera").val()
+                            };
+
+                        $.ajax({
+                            type: 'PUT',
+                            url: url,
+                            contentType: 'application/json',
+                            data: JSON.stringify(data), // access in body
+                        }).done(function (status) {
+                            if(status == null){
+                                $("#resultado").html("El alumno a actualizar no existe");
+                            }else{
+                                console.log('SUCCESS');
+                                $("#resultado").html("Alumno actualizado");
+                            }
+                        })
+                    }
+
+                });
+
+                //Método que elimina a un alumno mediante su matricula
+                $("#delete").click(function(){
+
+                    var url="http://localhost:8080/alumnos/"+$("#matricula").val();
+                    var opt=$("#matricula").val();
+                    if(opt != ''){
+                        $.ajax({
+                        type: 'DELETE',
+                        url: url
+                        }).done(function (status) {
+                            console.log('SUCCESS');
+                            $("#resultado").html("Alumno eliminado correctamente");
+                        }).fail(function (){
+                            $("#resultado").html("El alumno con matricula "+$("#matricula").val()+" no existe");
+                        })
+                    }else{
+                        alert("Es necesario llenar el campo de la matricula");
+                    }
+                });
+            });
+
+            function valida_campos(){
+                var matricula=$("#matricula").val();
+                var nombre=$("#nombre").val();
+                var carrera=$("#carrrera").val();
+                var resul = true;
+                if(matricula === ''){
+                    alert("No ingresaste la matricula");
+                    resul= false;
+                }
+                if(nombre === ''){
+                   alert("No ingresaste el nombre");
+                   resul= false;
+                }
+                if(carrera === ''){
+                    alert("No ingresaste la carrera");
+                    resul= false;
+                }
+                return resul;
+            };
+        </script>
     </head>
     <body>
-        <script>
-            function metodo_post(){  
-                fetch('http://localhost:8080/alumnos/create',{
-                method: 'POST',
-                body: JSON.stringify(
-                    {"matricula": document.getElementById("mat").value,
-                     "nombre": ""+document.getElementById("nom").value,
-                      "carrera":""+document.getElementById("car").value}),
-                cache: 'no-cache'
-                })
-                .then(function(response) {
-                    if(response.ok) {
-                        document.getElementById("resultado").innerHTML="Llamado al método post() "+response.type;
-                    }
-                    return response.json();
-                })
-                .then(function(data) {
-                    console.log('data = ', data);
-                })
-                .catch(function(err) {
-                    console.error(err);
-                });
-            }
-            function metodo_get_all(){
-                fetch('http://localhost:8080/alumnos', {
-                    method: 'GET'
-                    })
-                .then(function(response) {
-                    if(response.ok) {
-                        document.getElementById("resultado").innerHTML="Llamado al método get_all() "+response.type;
-                    } else {
-                        
-                    }
-                })
-
-            }
-            function metodo_get_id(){
-                var matricula= document.getElementById("mat").value;
-                fetch('http://localhost:8080/alumnos/'+matricula+' ', {
-                    method: 'GET'
-                    })
-                .then(function(response) {
-                    if(response.ok) {
-                        document.getElementById("resultado").innerHTML="Llamado al método get_id() "+response.type;
-                    } else {
-                        
-                    }
-                })
-            }
-            function metodo_put(){
-                fetch('http://localhost:8080/alumnos/create',{
-                method: 'PUT',
-                body: JSON.stringify(
-                    {"matricula": document.getElementById("mat").value,
-                     "nombre": ""+document.getElementById("nom").value,
-                      "carrera":""+document.getElementById("car").value}),
-                cache: 'no-cache'
-                })
-                .then(function(response) {
-                    if(response.ok) {
-                        document.getElementById("resultado").innerHTML="Llamado al método put() "+response.type;
-                    }
-                    return response.json();
-                })
-                .then(function(data) {
-                    console.log('data = ', data);
-                })
-                .catch(function(err) {
-                    console.error(err);
-                });               
-                
-            }
-            function metodo_delete(){
-                var matricula= document.getElementById("mat").value;
-                fetch('http://localhost:8080/alumnos/'+matricula+' ', {
-                    method: 'DELETE'
-                    })
-                .then(function(response) {
-                    if(response.ok) {
-                        document.getElementById("resultado").innerHTML="Llamado al método get_delete() "+response.type;
-                    } else {
-                        
-                    }
-                })
-            }
-            
-        </script>
         <div >
-            <h1>Práctica de Endpoint Rest </h1>
+            <h1>Práctica de BACKEND </h1>
             <h2>Métodos CRUD</h2>
             <form >
-                Matricula: <input type="text" name="matricula" id="mat"><br>
-                Nombre: <input type="text" name="nombre" id="nom"><br>
-                Carrera: <input type="text" name="carrera" id="car"><br>
+                Matricula: <input type="text" name="matricula" id="matricula" required><br>
+                Nombre: <input type="text" name="nombre" id="nombre" required><br>
+                Carrera: <input type="text" name="carrera" id="carrrera" required><br>
             </form><br>
-            <input type="submit" value="Post" onclick="metodo_post()">
-            <input type="submit" value="Get_All" onclick="metodo_get_all()">
-            <input type="submit" value="Get_ID" onclick="metodo_get_id()">
-            <input type="submit" value="PUT" onclick="metodo_put()">
-            <input type="submit" value="DELETE" onclick="metodo_delete()">
-            <br><br><p id="resultado"></p>
+            <input type="submit" value="Post" id="post">
+            <input type="submit" value="Get_All" id="get_all">
+            <input type="submit" value="Get_ID" id="get_id">
+            <input type="submit" value="PUT" id="put">
+            <input type="submit" value="DELETE" id="delete">
+            <br><br><p id="resultado"></p><br>
+            <p id="resultado2"></p>
+            <p id="resultado3"></p>
+            <p id="resultado4"></p>
         </div>
     </body>
 </html>
