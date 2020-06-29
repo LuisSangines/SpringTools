@@ -1,9 +1,11 @@
 package mx.uam.spring.practicaSpring.servicio;
 
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.extern.slf4j.Slf4j;
-import mx.uam.spring.practicaSpring.negocio.modelo.Alumno;
+import mx.uam.spring.practicaSpring.negocio.AlumnoService;
+import mx.uam.spring.practicaSpring.negociomodelo.Alumno;
 
 /**
  * Controlador para el API rest
@@ -28,38 +31,53 @@ import mx.uam.spring.practicaSpring.negocio.modelo.Alumno;
 @Slf4j
 public class AlumnoController {
 	
-		private Map<Integer, Alumno> alumnoRepository= new HashMap<>();
+		@Autowired
+		private AlumnoService alumnoService;
 
-		@PostMapping( path= "/alumnos/create", consumes = MediaType.APPLICATION_JSON_VALUE)
-		public ResponseEntity<?> create(@RequestBody Alumno nuevoAlumno) {
+		@PostMapping( path= "/alumnos", consumes = MediaType.APPLICATION_JSON_VALUE, produces =  MediaType.APPLICATION_JSON_VALUE)
+		public ResponseEntity<?> create(@RequestBody @Valid Alumno nuevoAlumno) {
 			log.info("Recibi llamado a create con "+nuevoAlumno);
-			alumnoRepository.put(nuevoAlumno.getMatricula(), nuevoAlumno);//Simulación de base de datos
-			return ResponseEntity.status(HttpStatus.CREATED).build();
+
+			Alumno alumno=alumnoService.create(nuevoAlumno);
+			
+			if(alumno != null) {
+				return ResponseEntity.status(HttpStatus.CREATED).body(alumno); 
+			}else {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+			}
+			
+			
 		}
+		
 		@GetMapping( path="/alumnos", produces =  MediaType.APPLICATION_JSON_VALUE)
 		public ResponseEntity<?> retrieveAll() {
 			log.info("Recibi un llamado para recuperar a los alumnos");
-			return ResponseEntity.status(HttpStatus.OK).body(alumnoRepository.values());
+			List<Alumno> result=alumnoService.retrieveAll();
+			
+			return ResponseEntity.status(HttpStatus.OK).body(result);
 		}
 		
 		@GetMapping( path="/alumnos/{matricula}", produces =  MediaType.APPLICATION_JSON_VALUE)
-		public ResponseEntity<?> retrieve(@PathVariable("matricula") Integer matricula) {
+		public ResponseEntity<?> retrieve(@PathVariable("matricula") @Valid Integer matricula) {
 			log.info("Buscando al alumno con matricula "+matricula);
-			Alumno a= alumnoRepository.get(matricula);
-			if(a !=null) {
-				return ResponseEntity.status(HttpStatus.OK).body(a);
+			
+			Alumno alumno=alumnoService.retrieve(matricula);
+			
+			if(alumno != null) {
+				return ResponseEntity.status(HttpStatus.OK).body(alumno);
 			}else {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 			}
-			
 		}
-		@PutMapping(path= "/alumnos", consumes = MediaType.APPLICATION_JSON_VALUE)
-		public ResponseEntity<?> update(@RequestBody Alumno actualizaAlumno) {
-			log.info("Llamado a actualizar el alumno "+actualizaAlumno.getMatricula());
-			Alumno a= alumnoRepository.get(actualizaAlumno.getMatricula());
-			if(a !=null) {
-			alumnoRepository.replace(actualizaAlumno.getMatricula(), actualizaAlumno);
-			return ResponseEntity.status(HttpStatus.OK).body(a);
+
+		
+		@PutMapping(path= "/alumnos/{matricula}", consumes = MediaType.APPLICATION_JSON_VALUE)
+		public ResponseEntity<?> update(@PathVariable("matricula") Integer matricula ,@RequestBody @Valid Alumno actualizaAlumno) {
+			log.info("Llamado a actualizar el alumno "+matricula);
+			Alumno alumno=alumnoService.put(actualizaAlumno, matricula);
+			
+			if(alumno !=null) {
+				return ResponseEntity.status(HttpStatus.OK).body(alumno);
 			}
 			else {
 				return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -68,15 +86,17 @@ public class AlumnoController {
 		}
 		
 		@DeleteMapping(path="/alumnos/{matricula}")
-		public ResponseEntity<?> delete(@PathVariable("matricula") Integer matricula) {
+		public ResponseEntity<?> delete(@PathVariable("matricula") @Valid Integer matricula) {
 			log.info("Eliminando al alumno con matricula "+matricula);
-			Alumno a= alumnoRepository.get(matricula);
-			if(a !=null) {
-				alumnoRepository.remove(matricula);
-				return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+			Alumno alumno= alumnoService.delete(matricula);
+			
+			if(alumno !=null) {
+				return ResponseEntity.status(HttpStatus.OK).body("Alumno eliminado correctamente");
 			}else {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("El alumno no esta registrado");
 			}
+		
 		}
 		
-}
+}		
+
