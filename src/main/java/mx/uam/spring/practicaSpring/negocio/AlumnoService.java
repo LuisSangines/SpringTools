@@ -1,6 +1,6 @@
 package mx.uam.spring.practicaSpring.negocio;
 
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,9 +21,9 @@ public class AlumnoService {
 	public Alumno create(Alumno nuevoAlumno) {
 		//Regla de negocio : No se puede registrar 2 alumnos con la misma matricula
 		
-		Alumno alumno=alumnoRepository.findByMatricula(nuevoAlumno.getMatricula());
+		Optional<Alumno> alumno=alumnoRepository.findById(nuevoAlumno.getMatricula());
 		
-		if( alumno == null) {
+		if(!alumno.isPresent()) {
 			return alumnoRepository.save(nuevoAlumno);
 			 
 		}else {
@@ -35,8 +35,8 @@ public class AlumnoService {
 	 * 
 	 * @return List de los alumnos registrados
 	 */
-	public List<Alumno> retrieveAll(){
-		return alumnoRepository.find();
+	public Iterable<Alumno> retrieveAll(){
+		return alumnoRepository.findAll();
 	}
 	
 	/**
@@ -44,11 +44,11 @@ public class AlumnoService {
 	 * @param matricula
 	 * @return Alumno buscado , null si no existe el alumno
 	 */
-	public Alumno retrieve(Integer matricula) {
+	public Optional<Alumno> retrieve(Integer matricula) {
 		
-		Alumno alumno=alumnoRepository.findByMatricula(matricula);
-		if(alumno != null) {
-			return alumno;
+		Optional<Alumno> alumnoopt=alumnoRepository.findById(matricula);
+		if(alumnoopt.isPresent() == true) {
+			return alumnoopt;
 		}else {
 			return null;
 		}
@@ -61,9 +61,10 @@ public class AlumnoService {
 	 * @return Alumno actualizado , null si no existe el alumno
 	 */
 	public Alumno put(Alumno actualizaAlumno,Integer matricula) {
-		Alumno alumno = alumnoRepository.update(actualizaAlumno, matricula);
-		if(alumno != null) {
-			return alumno;
+		Optional<Alumno> alumno = alumnoRepository.findById(matricula);
+		
+		if(alumno.isPresent() == true) {
+			return alumnoRepository.save(actualizaAlumno);
 		}else {
 			return null;		
 		}
@@ -73,14 +74,15 @@ public class AlumnoService {
 	/**
 	 * 
 	 * @param matricula
-	 * @return alumno eliminado, null si no existe el alumno
+	 * @return true si el alumno fue eliminado ,false si no
 	 */
-	public Alumno delete(Integer matricula) {
-		Alumno alumno=alumnoRepository.findByMatricula(matricula);
-		if(alumno != null) {
-			return alumnoRepository.delete(matricula);
+	public boolean delete(Integer matricula) {
+		Optional<Alumno> alumno=alumnoRepository.findById(matricula);
+		if(alumno.isPresent() == true) {
+			alumnoRepository.deleteById(matricula);
+			return true;
 		}else {
-			return null;
+			return false;
 		}
 		
 	}
