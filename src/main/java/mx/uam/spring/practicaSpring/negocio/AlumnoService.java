@@ -15,6 +15,8 @@ public class AlumnoService {
 	private AlumnoRepository alumnoRepository;
 
 	/**
+	 * Método que crea nuevos alumnos 
+	 * 
 	 * @param nuevoAlumno
 	 * @return El alumno registrado , null de lo contrario
 	 */
@@ -32,6 +34,7 @@ public class AlumnoService {
 	}
 	
 	/**
+	 * Método que recupera a tolos los alumos registrados
 	 * 
 	 * @return List de los alumnos registrados
 	 */
@@ -40,21 +43,19 @@ public class AlumnoService {
 	}
 	
 	/**
+	 * Método que recupera un alumno
 	 * 
 	 * @param matricula
 	 * @return Alumno buscado , null si no existe el alumno
 	 */
-	public Optional<Alumno> retrieve(Integer matricula) {
+	public Alumno retrieve(Integer matricula) {
 		
 		Optional<Alumno> alumnoopt=alumnoRepository.findById(matricula);
-		if(alumnoopt.isPresent() == true) {
-			return alumnoopt;
-		}else {
-			return null;
-		}
+		return alumnoopt.get();
 	}
 	
 	/**
+	 * Método que actualiza un alumno
 	 * 
 	 * @param actualizaAlumno
 	 * @param matricula
@@ -72,6 +73,7 @@ public class AlumnoService {
 	}
 	
 	/**
+	 * Método que elimina un alumno
 	 * 
 	 * @param matricula
 	 * @return true si el alumno fue eliminado ,false si no

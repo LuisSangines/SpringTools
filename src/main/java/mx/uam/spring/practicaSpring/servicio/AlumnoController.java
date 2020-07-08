@@ -1,6 +1,5 @@
 package mx.uam.spring.practicaSpring.servicio;
 
-import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -34,6 +33,12 @@ public class AlumnoController {
 		@Autowired
 		private AlumnoService alumnoService;
 
+		/**
+		 * POST /alumnos
+		 * 
+		 * @param nuevoAlumno
+		 * @return
+		 */
 		@ApiOperation(
 				value="Crear un alumno",
 				notes="Para crear al alumno la matriucla debe de ser única"
@@ -53,6 +58,11 @@ public class AlumnoController {
 			
 		}
 	
+		/**
+		 * GET /alumnos
+		 * 
+		 * @return
+		 */
 		@ApiOperation(
 				value="Recupera alumnos",
 				notes="Recupera a todos alumnos creados"
@@ -65,6 +75,12 @@ public class AlumnoController {
 			return ResponseEntity.status(HttpStatus.OK).body(result);
 		}
 
+		/**
+		 * GET /alumnos/{matricula}
+		 * 
+		 * @param matricula
+		 * @return
+		 */
 		@ApiOperation(
 				value="Recupera un alumno",
 				notes="Recupera a un alumno por medio de su matricula"
@@ -73,7 +89,7 @@ public class AlumnoController {
 		public ResponseEntity<?> retrieve(@PathVariable("matricula") @Valid Integer matricula) {
 			log.info("Buscando al alumno con matricula "+matricula);
 			
-			Optional<Alumno> alumno=alumnoService.retrieve(matricula);
+			Alumno alumno=alumnoService.retrieve(matricula);
 			
 			if(alumno != null) {
 				return ResponseEntity.status(HttpStatus.OK).body(alumno);
@@ -82,6 +98,13 @@ public class AlumnoController {
 			}
 		}
 
+		/**
+		 * PUT /alumnos/{matricula}
+		 * 
+		 * @param matricula
+		 * @param actualizaAlumno
+		 * @return
+		 */
 		@ApiOperation(
 				value="Actualiza alumno",
 				notes="Se puede actualizar el nombre y carrera de un alumno"
@@ -100,6 +123,12 @@ public class AlumnoController {
 			
 		}
 		
+		/**
+		 * DELETE /alumnos/{matricula}
+		 * 
+		 * @param matricula
+		 * @return
+		 */
 		@ApiOperation(
 				value="Elimina un alumno",
 				notes="Por medio de la matriucla se elimina a un alumno"
